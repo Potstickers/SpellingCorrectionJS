@@ -1,10 +1,12 @@
 var SpellingCorrection = (function() {
 
   var array2D = function(rows,cols) {
-    var array = new Array(rows);
-    for(var i = rows; i--;)
-      array[i] = new Array(cols);
-
+    var array = [];
+    for(var i = rows; i--;) {
+      array[i] = [];
+      for(var j = cols; j--;)
+        array[i][j] = [];
+    }
     return array;
   };
   var primitiveMin = function(a, b){
@@ -26,9 +28,9 @@ var SpellingCorrection = (function() {
         table[i + 1][1] = i;
         table[i + 1][0] = INF;
       }
-      for(i = 0; i <= tgt_len; i++) {
-        table[1][i + 1] = i;
-        table[0][i + 1] = INF;
+      for(j = 0; j <= tgt_len; j++) {
+        table[1][j + 1] = j;
+        table[0][j + 1] = INF;
       }
       var sorted_dict = {}; //http://bit.ly/1dZJtzS
       var cat_chars = source + target;
@@ -37,6 +39,7 @@ var SpellingCorrection = (function() {
         if(!sorted_dict.hasOwnProperty(cur_char))
           sorted_dict[cur_char] = 0;
       }
+      console.log(sorted_dict);
       for(i = 1; i <= src_len; i++) {
         var db = 0;
         for(j = 1; j <= tgt_len; j++) {
@@ -49,14 +52,14 @@ var SpellingCorrection = (function() {
             table[i + 1][j + 1] = primitiveMin(
                 table[i][j]
               , primitiveMin( table[i + 1][j]
-                            , table[i][j + 1]));
+                            , table[i][j + 1])) + 1;
           table[i + 1][j + 1] = primitiveMin(
               table[i + 1][j + 1]
             , table[i1][j1] + i - i1 - 1 + j - j1 - 1);
-          sorted_dict[source.charAt(i - 1)] = i;
         }
-        return table[src_len + 1][tgt_len + 1]; 
+        sorted_dict[source.charAt(i - 1)] = i;
       }
+      return table[src_len + 1][tgt_len + 1];
     }
   };
 }());
