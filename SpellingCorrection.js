@@ -1,10 +1,18 @@
 var SpellingCorrection = (function() {
-  //util functions
+  var containsTerm = function(array, term) {
+    var length = array.length;
+    if(length === 0) return false;
+    for(;length--;) {
+      if(array[length].term === term)
+        return true;
+    }
+    return false;
+  };
   var array2D = function(rows,cols) {
     var array = [];
-    for(var i = rows; i--;) {
+    for( var i = rows; i--;) {
       array[i] = [];
-      for(var j = cols; j--;)
+      for( var j = cols; j--;)
         array[i][j] = [];
     }
     return array;
@@ -75,30 +83,64 @@ var SpellingCorrection = (function() {
   var lookup = function(input, lang, editDistMax) {
     var candidates = [],
         suggestions = [];
-
     candidates.push({
       term: input,
       dist: 0
     });
-
-    var value;
+    //try to refactor: break,continue ugly af
     while(candidates.length > 0) {
       var candidate = candidates.splice(0,1)[0];
       if((candidate.dist > editDistMax) || 
-        ((verbose < 2) 
-          && (suggestions.length > 0) 
-          && (candidate.dist > suggestions[0].dist)))
-        break;
-      //these lats of peace ain't gonna build themselves.
+        ((verbose < 2) &&
+          (suggestions.length > 0) &&
+          (candidate.dist > suggestions[0].dist))) break;
+      var val = dictionary[lang + candidate.term];
+      if(typeof val !== 'undefined') {
+        var suggestion = {
+          term: val.term,
+          count: val.count,
+          dist: candidate.dist
+        };
+        if(containsTerm(suggestions, val.term)) {
+          suggestions.push(suggestion);
+          if((verbose < 2) && (candidate.dist === 0)) break;
+        }
+      }
+
+      var dist, val1;
+      for(var i = 0, var length = val.suggestions.length; i < length; i++) {
+        if(!containsTerm(suggestions, suggestion.term)) {
+          dist = distance(suggestion, candidate, input);
+          if((verbose < 2) && (suggestions.length > 0)) {
+            if(suggestions[0].dist > dist) suggestions = [];
+            if(suggestions[0].dist < dist) continue;
+            if(dist <= editDistMax && (val1 = dictionary) !== 'undefined')
+              suggestions.push({
+                term: val1.term,
+                count: val1.count,
+                dist: dist
+              });
+          }
+        }
+      }
+      if(candidate.dist < editDistMax) {
+        var edits = edits(candidate.term, candidate.dist, false); //next
+        for(i = edits.length; i--;) {
+          if(!containsTerm(candidates, edits[i].term))
+            candidates.push(edits[i]);
+        }
+      }
     }
-    //can collapse into one comparison?
+
     suggestions.sort(function(a, b) {
-      return a.dist - b.dist;
+      var dDist = a.dist - b.dist;
+      if(dDist === 0)
+        return -(a.count - b.count);
+      else
+        return dDist;
     });
-    suggestions.sort(function(a, b) {
-      return -(a.count - b.count);
-    });
-    if((verbose === 0) && (suggestions,length > 1))
+
+    if((verbose === 0) && (suggestions.length > 1))
       return suggestions.slice(0,1);
     else
       return suggestions;
