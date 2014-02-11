@@ -1,4 +1,5 @@
 var SpellingCorrection = (function() {
+  //util functions
   var containsTerm = function(array, term) {
     var length = array.length;
     if(length === 0) return false;
@@ -8,6 +9,11 @@ var SpellingCorrection = (function() {
     }
     return false;
   };
+  
+  var removeChar = function(str, index) {
+    return str.substring(0, index) + str.substring(index + 1);
+  };
+  
   var array2D = function(rows,cols) {
     var array = [];
     for( var i = rows; i--;) {
@@ -17,12 +23,14 @@ var SpellingCorrection = (function() {
     }
     return array;
   };
+  
   var primitiveMin = function(a, b){
     if(a > b)
       return b;
     else
       return a;
   };
+  
   //core algo parts
   //Damerau–Levenshtein distance
   var dlDistance = function(source, target) {
@@ -67,7 +75,7 @@ var SpellingCorrection = (function() {
       sorted_dict[source.charAt(i - 1)] = i;
     }
     return table[src_len + 1][tgt_len + 1];
-  }
+  };
 
   var distance = function(editDict, editInput, inputOrig) {
     if(editDict.term === inputOrig)
@@ -78,8 +86,31 @@ var SpellingCorrection = (function() {
       return editDict.dist;
     else
       return dlDistance(editDict.term, inputOrig);
-  }
-
+  };
+  
+  var getEdits = function(word, editDist, shouldRecur) {
+    editDist += 1;
+    var deletes = [], deleteObj, wordLen = word.length;
+    if(wordLen > 1) {
+      for(var i = 0; i < wordLen; i++) {
+        deleteObj = {
+          term: removeChar(word, i),
+          dist: editDist
+        };
+        if(!containsTerm(deletes, deleteObj.term)) {
+          deletes.push(deleteObj);
+          if(shouldRecur && editDist < editDistMax) {
+            var edits = getEdits(deleteObj.term, editDist, shouldRecur);
+            for(var j = edits.length; j--;) {
+              if(!containsTerm(deletes, edits[j].term))
+                deletes.push[edits[j]];
+            }
+          }
+        }
+      }
+    }
+    return deletes;
+  };
   var lookup = function(input, lang, editDistMax) {
     var candidates = [],
         suggestions = [];
@@ -106,9 +137,9 @@ var SpellingCorrection = (function() {
           if((verbose < 2) && (candidate.dist === 0)) break;
         }
       }
-
+      
       var dist, val1;
-      for(var i = 0, var length = val.suggestions.length; i < length; i++) {
+      for(var i = 0, length = val.suggestions.length; i < length; i++) {
         if(!containsTerm(suggestions, suggestion.term)) {
           dist = distance(suggestion, candidate, input);
           if((verbose < 2) && (suggestions.length > 0)) {
@@ -125,7 +156,7 @@ var SpellingCorrection = (function() {
       }
       if(candidate.dist < editDistMax) {
         var edits = edits(candidate.term, candidate.dist, false); //next
-        for(i = edits.length; i--;) {
+        for(i = edits.length; i-- ;) {
           if(!containsTerm(candidates, edits[i].term))
             candidates.push(edits[i]);
         }
@@ -144,7 +175,7 @@ var SpellingCorrection = (function() {
       return suggestions.slice(0,1);
     else
       return suggestions;
-  }
+  };
 
   return {
     correct: function(word) {
