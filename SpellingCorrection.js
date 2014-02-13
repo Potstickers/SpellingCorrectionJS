@@ -2,9 +2,9 @@ var SpellingCorrection = (function() {
   //util functions
   var containsTerm = function(array, term) {
     var length = array.length;
-    if(length === 0) return false;
-    for(;length--;) {
-      if(array[length].term === term)
+    if (length === 0) return false;
+    for (;length--;) {
+      if (array[length].term === term)
         return true;
     }
     return false;
@@ -16,16 +16,16 @@ var SpellingCorrection = (function() {
   
   var array2D = function(rows,cols) {
     var array = [];
-    for( var i = rows; i--;) {
+    for ( var i = rows; i--;) {
       array[i] = [];
-      for( var j = cols; j--;)
+      for ( var j = cols; j--;)
         array[i][j] = [];
     }
     return array;
   };
   
   var primitiveMin = function(a, b){
-    if(a > b)
+    if (a > b)
       return b;
     else
       return a;
@@ -40,27 +40,27 @@ var SpellingCorrection = (function() {
     var INF     = src_len + tgt_len;
     table[0][0] = INF;
     var i, j, i1, j1;
-    for(i = 0; i <= src_len; i++) {
+    for (i = 0; i <= src_len; i++) {
       table[i + 1][1] = i;
       table[i + 1][0] = INF;
     }
-    for(j = 0; j <= tgt_len; j++) {
+    for (j = 0; j <= tgt_len; j++) {
       table[1][j + 1] = j;
       table[0][j + 1] = INF;
     }
     var sorted_dict = {}; //http://bit.ly/1dZJtzS
     var cat_chars = source + target;
-    for(i = cat_chars.length; i--;) {
+    for (i = cat_chars.length; i--;) {
       var cur_char = cat_chars.charAt(i);
-      if(!sorted_dict.hasOwnProperty(cur_char))
+      if (!sorted_dict.hasOwnProperty(cur_char))
         sorted_dict[cur_char] = 0;
     }
-    for(i = 1; i <= src_len; i++) {
+    for (i = 1; i <= src_len; i++) {
       var db = 0;
-      for(j = 1; j <= tgt_len; j++) {
+      for (j = 1; j <= tgt_len; j++) {
         i1 = sorted_dict[target.charAt(j - 1)];
         j1 = db;
-        if(source.charAt(i-1) === target.charAt(j - 1)){
+        if (source.charAt(i-1) === target.charAt(j - 1)) {
           table[i + 1][j + 1] = table[i][j];
           db = j;
         } else 
@@ -78,11 +78,11 @@ var SpellingCorrection = (function() {
   };
 
   var distance = function(editDict, editInput, inputOrig) {
-    if(editDict.term === inputOrig)
+    if (editDict.term === inputOrig)
       return 0;
-    else if(editDict.dist === 0)
+    else if (editDict.dist === 0)
       return editInput.dist;
-    else if(editInput.dist === 0)
+    else if (editInput.dist === 0)
       return editDict.dist;
     else
       return dlDistance(editDict.term, inputOrig);
@@ -91,18 +91,18 @@ var SpellingCorrection = (function() {
   var getEdits = function(word, editDist, shouldRecur) {
     editDist += 1;
     var deletes = [], deleteObj, wordLen = word.length;
-    if(wordLen > 1) {
-      for(var i = 0; i < wordLen; i++) {
+    if (wordLen > 1) {
+      for (var i = 0; i < wordLen; i++) {
         deleteObj = {
           term: removeChar(word, i),
           dist: editDist
         };
-        if(!containsTerm(deletes, deleteObj.term)) {
+        if (!containsTerm(deletes, deleteObj.term)) {
           deletes.push(deleteObj);
-          if(shouldRecur && editDist < editDistMax) {
+          if (shouldRecur && editDist < editDistMax) {
             var edits = getEdits(deleteObj.term, editDist, shouldRecur);
-            for(var j = edits.length; j--;) {
-              if(!containsTerm(deletes, edits[j].term))
+            for (var j = edits.length; j--;) {
+              if (!containsTerm(deletes, edits[j].term))
                 deletes.push[edits[j]];
             }
           }
@@ -119,33 +119,32 @@ var SpellingCorrection = (function() {
       dist: 0
     });
     //try to refactor: break,continue ugly af
-    while(candidates.length > 0) {
+    while (candidates.length > 0) {
       var candidate = candidates.splice(0,1)[0];
-      if((candidate.dist > editDistMax) || 
-        ((verbose < 2) &&
-          (suggestions.length > 0) &&
-          (candidate.dist > suggestions[0].dist))) break;
+      if (candidate.dist > editDistMax || (verbose < 2 &&
+          suggestions.length > 0 &&
+          candidate.dist > suggestions[0].dist)) break;
       var val = dictionary[lang + candidate.term];
-      if(typeof val !== 'undefined') {
+      if (typeof val !== 'undefined') {
         var suggestion = {
           term: val.term,
           count: val.count,
           dist: candidate.dist
         };
-        if(containsTerm(suggestions, val.term)) {
+        if (containsTerm(suggestions, val.term)) {
           suggestions.push(suggestion);
-          if((verbose < 2) && (candidate.dist === 0)) break;
+          if (verbose < 2 && candidate.dist === 0) break;
         }
       }
       
       var dist, val1;
-      for(var i = 0, length = val.suggestions.length; i < length; i++) {
-        if(!containsTerm(suggestions, suggestion.term)) {
+      for (var i = 0, length = val.suggestions.length; i < length; i++) {
+        if (!containsTerm(suggestions, suggestion.term)) {
           dist = distance(suggestion, candidate, input);
-          if((verbose < 2) && (suggestions.length > 0)) {
-            if(suggestions[0].dist > dist) suggestions = [];
-            if(suggestions[0].dist < dist) continue;
-            if(dist <= editDistMax && (val1 = dictionary) !== 'undefined')
+          if ((verbose < 2) && (suggestions.length > 0)) {
+            if (suggestions[0].dist > dist) suggestions = [];
+            if (suggestions[0].dist < dist) continue;
+            if (dist <= editDistMax && (val1 = dictionary) !== 'undefined')
               suggestions.push({
                 term: val1.term,
                 count: val1.count,
@@ -154,10 +153,10 @@ var SpellingCorrection = (function() {
           }
         }
       }
-      if(candidate.dist < editDistMax) {
-        var edits = edits(candidate.term, candidate.dist, false); //next
-        for(i = edits.length; i-- ;) {
-          if(!containsTerm(candidates, edits[i].term))
+      if (candidate.dist < editDistMax) {
+        var edits = getEdits(candidate.term, candidate.dist, false); 
+        for (i = edits.length; i-- ;) {
+          if (!containsTerm(candidates, edits[i].term))
             candidates.push(edits[i]);
         }
       }
@@ -165,18 +164,30 @@ var SpellingCorrection = (function() {
 
     suggestions.sort(function(a, b) {
       var dDist = a.dist - b.dist;
-      if(dDist === 0)
+      if (dDist === 0)
         return -(a.count - b.count);
       else
         return dDist;
     });
 
-    if((verbose === 0) && (suggestions.length > 1))
+    if (verbose === 0 && suggestions.length > 1)
       return suggestions.slice(0,1);
     else
       return suggestions;
   };
 
+  var addLowestDist = function(suggestions, suggestion) {
+    if (verbose < 2 && 
+        suggestions.length > 0 &&
+        suggestions[0].dist > suggestion.dist)
+      suggestions = [];
+      
+    if (verbose === 2 ||
+        suggestions.length === 0 ||
+        suggestions[0].dist >= suggestion.dist)
+      suggestions.push(suggestion);
+  };
+  
   return {
     correct: function(word) {
       //return array of possible corrections
