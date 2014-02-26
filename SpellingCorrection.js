@@ -1,4 +1,5 @@
 var SpellingCorrection = (function() {
+  var Dictionary = {}; 
   //util functions
   var containsTerm = function(array, term) {
     var length = array.length;
@@ -124,7 +125,7 @@ var SpellingCorrection = (function() {
       if (candidate.dist > editDistMax || (verbose < 2 &&
           suggestions.length > 0 &&
           candidate.dist > suggestions[0].dist)) break;
-      var val = dictionary[lang + candidate.term];
+      var val = Dictionary[lang + candidate.term];
       if (typeof val !== 'undefined') {
         var suggestion = {
           term: val.term,
@@ -144,7 +145,8 @@ var SpellingCorrection = (function() {
           if ((verbose < 2) && (suggestions.length > 0)) {
             if (suggestions[0].dist > dist) suggestions = [];
             if (suggestions[0].dist < dist) continue;
-            if (dist <= editDistMax && (val1 = dictionary) !== 'undefined')
+            if (dist <= editDistMax && 
+               (val1 = Dictionary[lang+suggestion.term]) !== 'undefined')
               suggestions.push({
                 term: val1.term,
                 count: val1.count,
@@ -188,6 +190,11 @@ var SpellingCorrection = (function() {
       suggestions.push(suggestion);
   };
   
+  var initDictionary = function(words) {
+    for (var i = words.length; i--;) {
+      
+    }
+  };
   return {
     correct: function(word) {
       //return array of possible corrections
