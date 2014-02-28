@@ -190,9 +190,26 @@ var SpellingCorrection = (function() {
       suggestions.push(suggestion);
   };
   
-  var initDictionary = function(words) {
+  var initDictionary = function(words, lang) {
+    var val = {}, word;
     for (var i = words.length; i--;) {
-      
+      word = words[i];
+      if (val = Dictionary[lang+word] !== 'undefined')
+        val.count++;
+      else
+        Dictionary[lang+word] = val;
+
+      if (val.term === 'undefined') {
+        val.term = key;
+        var edits = getEdits(key, 0, true);
+        for (var j = edits.length; j--;) {
+          var suggestion = {
+            term: key,
+            dist: edits[j].dist
+          };
+          
+        }
+      }
     }
   };
   return {
